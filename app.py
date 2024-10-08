@@ -1,15 +1,52 @@
+from logging.handlers import TimedRotatingFileHandler
+import os
 import pandas as pd
 from typing import Any, Dict
 from pymongo import MongoClient
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from validate import QueryModel
+import logging
 
+def get_logger() -> logging.Logger:
+    """
+    Configures and returns a logger that logs messages to both the console and a file. 
+    The file is rotated every hour, and up to 24 hourly logs are retained.
+
+    Returns:
+        Logger: Configured logger instance.
+    """
+    
+    # Configure logging with TimedRotatingFileHandler
+    log_file_path = os.path.join('logs', 'app.log')
+    log_file_handler = TimedRotatingFileHandler(
+        log_file_path,       # Log file name pattern (will rotate)
+        when="H",            # Rotate every hour ('H' means hour)
+        interval=1,          # Rotate every 1 hour
+        backupCount=24       # Keep last 24 log files (i.e., 1 day of logs)
+    )
+
+    # Log file naming format (rotated logs will be named with a timestamp suffix)
+    log_file_handler.suffix = "%Y-%m-%d_%H.log"  # Use date and hour in log filename
+
+    # Configure the logger
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            log_file_handler,       # Log to rotating file
+            logging.StreamHandler()  # Log to the console
+        ]
+    )
+
+    return logging.getLogger(__name__)
+
+# Create a logger instance
+logger = get_logger()
 
 # Lifespan event handler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Starting up...")
     # Startup actions
     load_data()
     yield
@@ -22,8 +59,9 @@ try:
     client = MongoClient("mongodb://localhost:27017/")
     db = client["task1"]
     collection = db["bbc_news"]
-    print("\033[95m Connected to MongoDB \033[0m")
+    logger.info("Connected to MongoDB")
 except Exception as e:
+    logger.critical(f"Error connecting to MongoDB: {str(e)}")
     raise RuntimeError(f"Error connecting to MongoDB: {str(e)}")
 
 def load_data()->None:
@@ -32,12 +70,12 @@ def load_data()->None:
     """
     # Check if collection is empty
     if collection.count_documents({}) == 0:
-        print("\033[93m Loading data from CSV to MongoDB... \033[0m")
+        logger.info("Loading data from CSV to MongoDB...")
         df = load_bbc_news_data('bbc_news_data/bbc_news.csv')
         filtered_df = filter_news_first_half_2024(df)
         insert_news_to_mongo(collection, data=filtered_df)
     else:
-        print("\033[96m No data to load. MongoDB collection is not empty. \033[0m")
+        logger.info("No data to load. MongoDB collection is not empty.")
 
 def load_bbc_news_data(file_path: str) -> pd.DataFrame:
     """
@@ -53,6 +91,7 @@ def load_bbc_news_data(file_path: str) -> pd.DataFrame:
         df = pd.read_csv(file_path)
         return df
     except Exception as e:
+        logger.critical(f"Error loading the data: {str(e)}")
         raise RuntimeError(f"Error loading the data: {str(e)}")
 
 
@@ -78,24 +117,9 @@ def filter_news_first_half_2024(df: pd.DataFrame) -> pd.DataFrame:
         return filtered_df
 
     except Exception as e:
+        logger.critical(f"Error filtering the data: {str(e)}")
         raise RuntimeError(f"Error filtering the data: {str(e)}")
 
-
-def get_mongo_client(uri: str = "mongodb://localhost:27017/") -> MongoClient:
-    """
-    Establish a connection to a MongoDB client.
-
-    Args:
-        uri (str, optional): MongoDB connection string. Defaults to "mongodb://localhost:27017/".
-
-    Returns:
-        MongoClient: The MongoDB client.
-    """
-    try:
-        client = MongoClient(uri)
-        return client
-    except Exception as e:
-        raise RuntimeError(f"Error connecting to MongoDB: {str(e)}")
 
 
 def insert_news_to_mongo(collection: any, data: pd.DataFrame) -> None:
@@ -112,11 +136,12 @@ def insert_news_to_mongo(collection: any, data: pd.DataFrame) -> None:
         # Insert data into collection
         if news_dict:
             collection.insert_many(news_dict)
-            print(
-                f"\033[92m Data loaded successfully into MongoDB.\033[0m [{len(news_dict)} documents]")
+            logger.info(
+                f"Data loaded successfully into MongoDB-> [{len(news_dict)} documents]")
         else:
             raise ValueError("No data to insert.")
     except Exception as e:
+        logger.critical(f"Error inserting data into MongoDB: {str(e)}")
         raise RuntimeError(f"Error inserting data into MongoDB: {str(e)}")
 
 
@@ -148,6 +173,5 @@ async def count_rows(query: QueryModel)-> Dict[str, int]:
         return {"count": count}
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error querying database: {str(e)}")
-
+        logger.error(status_code=500, detail=f"Error querying database: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error querying database: {str(e)}")
