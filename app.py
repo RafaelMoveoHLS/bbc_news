@@ -8,14 +8,12 @@ from validate import QueryModel
 app = FastAPI()
 
 # Lifespan event handler
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup actions
-    load_data()
-    yield
-    # Add any shutdown actions here if needed
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     # Startup actions
+#     load_data()
+#     yield
+#     # Add any shutdown actions here if needed
 
 try:
     # MongoDB setup
