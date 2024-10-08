@@ -5,15 +5,17 @@ from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from validate import QueryModel
 
-app = FastAPI()
 
 # Lifespan event handler
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     # Startup actions
-#     load_data()
-#     yield
-#     # Add any shutdown actions here if needed
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Starting up...")
+    # Startup actions
+    load_data()
+    yield
+    # Add any shutdown actions here if needed
+
+app = FastAPI(lifespan=lifespan)
 
 try:
     # MongoDB setup
@@ -24,6 +26,18 @@ try:
 except Exception as e:
     raise RuntimeError(f"Error connecting to MongoDB: {str(e)}")
 
+def load_data()->None:
+    """
+    Load BBC news data into MongoDB if the collection is empty.
+    """
+    # Check if collection is empty
+    if collection.count_documents({}) == 0:
+        print("\033[93m Loading data from CSV to MongoDB... \033[0m")
+        df = load_bbc_news_data('bbc_news_data/bbc_news.csv')
+        filtered_df = filter_news_first_half_2024(df)
+        insert_news_to_mongo(collection, data=filtered_df)
+    else:
+        print("\033[96m No data to load. MongoDB collection is not empty. \033[0m")
 
 def load_bbc_news_data(file_path: str) -> pd.DataFrame:
     """
@@ -107,7 +121,7 @@ def insert_news_to_mongo(collection: any, data: pd.DataFrame) -> None:
 
 
 @app.post("/count")
-async def count_rows(query: QueryModel):
+async def count_rows(query: QueryModel)-> Dict[str, int]:
     """
     API route that receives a JSON payload with key-value pairs 
     and returns the count of rows in MongoDB that match the query.
@@ -137,17 +151,3 @@ async def count_rows(query: QueryModel):
         raise HTTPException(
             status_code=500, detail=f"Error querying database: {str(e)}")
 
-
-@app.on_event("startup")
-def load_data():
-    """
-    Load BBC news data into MongoDB if the collection is empty.
-    """
-    # Check if collection is empty
-    if collection.count_documents({}) == 0:
-        print("\033[93m Loading data from CSV to MongoDB... \033[0m")
-        df = load_bbc_news_data('bbc_news_data/bbc_news.csv')
-        filtered_df = filter_news_first_half_2024(df)
-        insert_news_to_mongo(collection, data=filtered_df)
-    else:
-        print("\033[96m No data to load. MongoDB collection is not empty. \033[0m")
