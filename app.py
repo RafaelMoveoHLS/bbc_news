@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from services.dataloader import load_data
 from services.mongo_operations import count_documents_in_mongo
-from validate import QueryModel
+from services.validator import QueryModel
 from services.logger import get_logger
 
 # Create a logger instance

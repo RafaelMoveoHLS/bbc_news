@@ -1,7 +1,7 @@
 from services.logger import get_logger
 import pandas as pd
 from pymongo.collection import Collection
-from validate import QueryModel
+from services.validator import QueryModel
 
 
 logger = get_logger()
