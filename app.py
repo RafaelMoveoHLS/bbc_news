@@ -2,8 +2,20 @@ import pandas as pd
 from typing import Any, Dict
 from pymongo import MongoClient
 from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
+from validate import QueryModel
 
 app = FastAPI()
+
+# Lifespan event handler
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup actions
+    load_data()
+    yield
+    # Add any shutdown actions here if needed
 
 try:
     # MongoDB setup
@@ -88,7 +100,8 @@ def insert_news_to_mongo(collection: any, data: pd.DataFrame) -> None:
         # Insert data into collection
         if news_dict:
             collection.insert_many(news_dict)
-            print(f"\033[92m Data loaded successfully into MongoDB.\033[0m [{len(news_dict)} documents]")
+            print(
+                f"\033[92m Data loaded successfully into MongoDB.\033[0m [{len(news_dict)} documents]")
         else:
             raise ValueError("No data to insert.")
     except Exception as e:
@@ -96,7 +109,7 @@ def insert_news_to_mongo(collection: any, data: pd.DataFrame) -> None:
 
 
 @app.post("/count")
-async def count_rows(query: Dict[str, Any]):
+async def count_rows(query: QueryModel):
     """
     API route that receives a JSON payload with key-value pairs 
     and returns the count of rows in MongoDB that match the query.
@@ -108,12 +121,18 @@ async def count_rows(query: Dict[str, Any]):
         dict: A dictionary containing the count of matching rows.
     """
     try:
-        print(query)
+        # Convert the query model to a dictionary, excluding None values
+        query_dict = query.model_dump(exclude_none=True)
+
+        # Modify query to use regular expressions for partial matches
+        regex_query = {}
+        for key, value in query_dict.items():
+            # Use MongoDB regex to search for values like SQL's LIKE '%value%'
+            regex_query[key] = {"$regex": value, "$options": "i"} # "i" for case-insensitive
 
         # Perform the MongoDB query
-        count = collection.count_documents(query)
+        count = collection.count_documents(regex_query)
 
-        # Return the count
         return {"count": count}
 
     except Exception as e:
@@ -123,6 +142,9 @@ async def count_rows(query: Dict[str, Any]):
 
 @app.on_event("startup")
 def load_data():
+    """
+    Load BBC news data into MongoDB if the collection is empty.
+    """
     # Check if collection is empty
     if collection.count_documents({}) == 0:
         print("\033[93m Loading data from CSV to MongoDB... \033[0m")
