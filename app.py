@@ -1,45 +1,10 @@
-from logging.handlers import TimedRotatingFileHandler
-import os
 import pandas as pd
 from typing import Any, Dict
 from pymongo import MongoClient
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from validate import QueryModel
-import logging
-
-def get_logger() -> logging.Logger:
-    """
-    Configures and returns a logger that logs messages to both the console and a file. 
-    The file is rotated every hour, and up to 24 hourly logs are retained.
-
-    Returns:
-        Logger: Configured logger instance.
-    """
-    
-    # Configure logging with TimedRotatingFileHandler
-    log_file_path = os.path.join('logs', 'app.log')
-    log_file_handler = TimedRotatingFileHandler(
-        log_file_path,       # Log file name pattern (will rotate)
-        when="H",            # Rotate every hour ('H' means hour)
-        interval=1,          # Rotate every 1 hour
-        backupCount=24       # Keep last 24 log files (i.e., 1 day of logs)
-    )
-
-    # Log file naming format (rotated logs will be named with a timestamp suffix)
-    log_file_handler.suffix = "%Y-%m-%d_%H.log"  # Use date and hour in log filename
-
-    # Configure the logger
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            log_file_handler,       # Log to rotating file
-            logging.StreamHandler()  # Log to the console
-        ]
-    )
-
-    return logging.getLogger(__name__)
+from services.logger import get_logger
 
 # Create a logger instance
 logger = get_logger()
@@ -119,7 +84,6 @@ def filter_news_first_half_2024(df: pd.DataFrame) -> pd.DataFrame:
     except Exception as e:
         logger.critical(f"Error filtering the data: {str(e)}")
         raise RuntimeError(f"Error filtering the data: {str(e)}")
-
 
 
 def insert_news_to_mongo(collection: any, data: pd.DataFrame) -> None:
