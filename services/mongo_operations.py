@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from services.logger import get_logger
 import pandas as pd
 from pymongo.collection import Collection
@@ -39,6 +40,10 @@ def count_documents_in_mongo(collection: Collection, query: QueryModel) -> int:
     Returns:
         int: Count of matching rows
     """
-    query_dict = query.model_dump(exclude_none=True)
-    regex_query = {key: {"$regex": value, "$options": "i"} for key, value in query_dict.items()}
-    return collection.count_documents(regex_query)
+    try:
+        query_dict = query.model_dump(exclude_none=True)
+        regex_query = {key: {"$regex": value, "$options": "i"} for key, value in query_dict.items()}
+        return collection.count_documents(regex_query)
+    except Exception as e:
+        logger.error(status_code=500, detail=f"Error querying database: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error querying database: {str(e)}")

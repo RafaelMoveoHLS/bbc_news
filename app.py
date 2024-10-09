@@ -32,13 +32,9 @@ async def count_rows(query: QueryModel)-> Dict[str, int]:
     Returns:
         dict: A dictionary containing the count of matching rows.
     """
-    try:
-        count = count_documents_in_mongo(collection, query)
-        return {"count": count}
+    count = count_documents_in_mongo(collection, query)
+    return {"count": count}
 
-    except Exception as e:
-        logger.error(status_code=500, detail=f"Error querying database: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error querying database: {str(e)}")
 
 try:
     # MongoDB setup
