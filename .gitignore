@@ -162,3 +162,9 @@ cython_debug/
 # VSCode local history
 .history/
 .vscode/
+
+# Ignore all files in the logs directory
+logs/*
+
+# Except the logs directory itself
+!logs/.gitkeep
