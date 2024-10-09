@@ -167,4 +167,4 @@ cython_debug/
 logs/*
 
 # Except the logs directory itself
-!logs/
+!logs/.gitkeep
