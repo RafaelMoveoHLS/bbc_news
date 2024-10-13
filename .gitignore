@@ -163,8 +163,8 @@ cython_debug/
 .history/
 .vscode/
 
-# Ignore all files in the logs directory
+# Add only directories
 logs/*
-
-# Except the logs directory itself
 !logs/.gitkeep
+bbc_news_data/*
+!bbc_news_data/.gitkeep
