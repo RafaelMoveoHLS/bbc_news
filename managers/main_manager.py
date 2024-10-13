@@ -9,19 +9,14 @@ class Manager:
     """
     
     client: MongoClient = None
+    db_name: str = None
+    collection_name: str = None
 
-    @property
-    @abstractmethod
-    def db(self) -> Database:
-        pass
-    
-    @abstractmethod
-    def collection(self) -> Collection:
-        pass
-
-    def __init__(self):
+    def __init__(self) -> None:
         # TODO: Change the connect string to be taken from the env files.
         self.client = MongoClient("mongodb://localhost:27017/")
+        self.db = self.client[self.db_name]
+        self.collection = self.db[self.collection_name]
     
     def count_matching_rows(self, query_dict: object) -> int:
         """
@@ -34,7 +29,6 @@ class Manager:
             int: Count of matching rows
         """
         regex_query = {key: {"$regex": value, "$options": "i"} for key, value in query_dict.items()}
-        # print(regex_query)
         return self.collection.count_documents(regex_query)
     
     def insert_many(self, data_dict: list[dict]) -> None:
