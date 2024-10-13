@@ -21,10 +21,7 @@ class NewsController:
             int: Count of matching news
         """
         try:
-            query_dict = query.model_dump(exclude_none=True)
-            count = self.handler.count_matching_news(query_dict)
-            return {"count": count}
-
+            return self.handler.count_matching_news(query)
         except Exception as e:
             logger.error(msg=f"Status code:{500}. Error querying database: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error querying database: {str(e)}")
