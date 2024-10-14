@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 from typing import Optional, Dict
 
-class QueryModel(BaseModel):
+class NewsQueryModel(BaseModel):
     """
     Pydantic model to validate the incoming JSON payload, ensuring that
     at least one of the specified fields is provided and all values are strings.
