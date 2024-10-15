@@ -53,12 +53,10 @@ class NewsHandler(Handler):
             news_embedding = news.get('openai_embedding', [])
             if news_embedding:
                 # Calculate cosine similarity between query and news embedding
-                similarity = cosine_similarity(
-                    [query_embedding], [news_embedding]
-                )[0][0]
+                similarity = cosine_similarity([query_embedding], [news_embedding])[0][0]
 
                 # Add to relevant news if similarity exceeds threshold
-                if similarity >= 0.45:
+                if similarity >= 0.46:
                     relevant_news.append({
                         "news": news,
                         "similarity": round(similarity, 4) 
