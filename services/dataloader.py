@@ -28,6 +28,10 @@ def load_data()->None:
             filtered_df = df[(df['pubDate'] >= start_date)
                             & (df['pubDate'] < end_date)]
 
+            # Drop duplicates based on 'title' or 'description'
+            filtered_df = filtered_df.drop_duplicates(subset=['title'], keep='first')
+            filtered_df = filtered_df.drop_duplicates(subset=['description'], keep='first')
+
             # Insert filtered news data into MongoDB
             news_dict = filtered_df.to_dict(orient='records')
             news_manager.insert_many(news_dict)
