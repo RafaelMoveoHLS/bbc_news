@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from fastapi import HTTPException
 from handlers.news_handler import NewsHandler
 from services.logger import get_logger
@@ -25,4 +26,20 @@ class NewsController:
         except Exception as e:
             logger.error(msg=f"Status code:{500}. Error querying database: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error querying database: {str(e)}")
+    
+    def semantic_news_search(self, query: str) -> Dict[str, Any]:
+        """
+        Retrieve related news articles based on semantic similarity.
+        
+        Args:
+            query (str): The search query passed as a query parameter.
+
+        Returns:
+            Dict[str, Any]: List of related news articles
+        """
+        try:
+            return self.handler.semantic_news_search(query)
+        except Exception as e:
+            logger.error(msg=f"Status code:{500}. Error while searching the news: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error while searching the news: {str(e)}")
     

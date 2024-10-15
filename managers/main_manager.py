@@ -39,3 +39,12 @@ class Manager:
             data_dict (list[dict]): The list of dictionaries to be inserted.
         """
         self.collection.insert_many(data_dict)
+    
+    def get_all_rows(self) -> list[dict]:
+        """
+        Retrieve all rows from the collection.
+        
+        Returns:
+            list[dict]: The list of all rows in the collection.
+        """
+        return list(self.collection.find())

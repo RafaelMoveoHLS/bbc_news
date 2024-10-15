@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from controllers.news_controller import NewsController
 from validators.news_validator import NewsQueryModel
-from typing import Dict
+from typing import Dict, List, Any
 
 router = APIRouter()
 
@@ -20,3 +20,17 @@ async def count_news(query: NewsQueryModel) -> Dict[str, int]:
         dict: A dictionary containing the count of matching rows.
     """
     return controller.count_matching_news(query)
+
+@router.get("/search")
+async def semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:
+    """
+    API route that receives a search query as a query parameter and returns related news articles
+    based on semantic similarity.
+
+    Args:
+        query (str): The search query passed as a query parameter.
+
+    Returns:
+        Dict[str, Any]: A list of dictionaries containing matching news articles.
+    """
+    return controller.semantic_news_search(query)
