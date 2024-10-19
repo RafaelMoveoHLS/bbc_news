@@ -56,29 +56,27 @@ class NewsHandler(Handler):
                 similarity = cosine_similarity([query_embedding], [news_embedding])[0][0]
 
                 # Add to relevant news if similarity exceeds threshold
-                if similarity >= 0.46:
+                if similarity >= 0.41:
                     relevant_news.append({
-                        "news": news,
-                        "similarity": round(similarity, 4) 
+                        "title": news["title"],
+                        "description": news["description"],
+                        "link": news["link"],
+                        "published_date": news["pubDate"].strftime("%Y-%m-%d"),
+                        "guid": news["guid"],
+                        "content": news["content"],
+                        "cosine_similarity": round(similarity, 4) 
                     })
 
         if len(relevant_news) > 0:
             # Sort relevant news by similarity in descending order
-            sorted_news = sorted(relevant_news, key=lambda x: x["similarity"], reverse=True)
+            sorted_news = sorted(relevant_news, key=lambda x: x["cosine_similarity"], reverse=True)
+
+            # print results
+            print(f"\n\n\n\033[94mQuery: {query} \033[0m")
+            for item in sorted_news:
+                print(f"\033[96m (Similarity: {item['cosine_similarity']:.3f})\033[0m RSS news content: {item['content']}")
 
             # Prepare the response object with related news
-            return {
-                "related_news": [
-                    {
-                        "title": item["news"]["title"],
-                        "description": item["news"]["description"],
-                        "link": item["news"]["link"],
-                        "published_date": item["news"]["pubDate"].strftime("%Y-%m-%d"),
-                        "guid": item["news"]["guid"],
-                        "similarity": item["similarity"]
-                    }
-                    for item in sorted_news
-                ]
-            }
+            return {"related_news": sorted_news}
         else:
             return {"related_news": "No relevant news found."}
