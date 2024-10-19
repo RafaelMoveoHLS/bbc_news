@@ -1,5 +1,6 @@
 from openai import OpenAI
 from services.logger import get_logger
+from config import OPENAI_API_KEY
 
 logger = get_logger()
 
@@ -14,7 +15,7 @@ def embed_with_openai_batched(texts: list[str], batch_size: int = 1000)-> list[l
     Returns:
         list[list[float]]: List of embeddings for the input texts.
     """    
-    client = OpenAI()
+    client = OpenAI(api_key=OPENAI_API_KEY)
     emb_list = []
     # Process texts in batches
     for batch_texts in batch(texts, batch_size):

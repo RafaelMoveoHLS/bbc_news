@@ -2,6 +2,7 @@ from abc import abstractmethod
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
+from config import MONGO_DB_URI
 
 class Manager:
     """
@@ -14,7 +15,7 @@ class Manager:
 
     def __init__(self) -> None:
         # TODO: Change the connect string to be taken from the env files.
-        self.client = MongoClient("mongodb://localhost:27017/")
+        self.client = MongoClient(MONGO_DB_URI)
         self.db = self.client[self.db_name]
         self.collection = self.db[self.collection_name]
     
