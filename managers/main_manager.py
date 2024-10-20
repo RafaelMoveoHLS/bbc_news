@@ -4,47 +4,44 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 from config import MONGO_DB_URI
 
+
 class Manager:
     """
     The main handler class
     """
-    
-    client: MongoClient = None
-    db_name: str = None
-    collection_name: str = None
 
-    def __init__(self) -> None:
-        # TODO: Change the connect string to be taken from the env files.
-        self.client = MongoClient(MONGO_DB_URI)
-        self.db = self.client[self.db_name]
-        self.collection = self.db[self.collection_name]
-    
+    def __init__(self, db_name: str, collection_name: str) -> None:
+        self.client: MongoClient = MongoClient(MONGO_DB_URI)
+        self.db: Database = self.client[db_name]
+        self.collection: Collection = self.db[collection_name]
+
     def count_matching_rows(self, query_dict: object) -> int:
         """
         Count rows in the collection that match the given query.
-        
+
         Args:
             query_dict (object): The query dictionary that was in the request body.
 
         Returns:
             int: Count of matching rows
         """
-        regex_query = {key: {"$regex": value, "$options": "i"} for key, value in query_dict.items()}
+        regex_query = {key: {"$regex": value, "$options": "i"}
+                       for key, value in query_dict.items()}
         return self.collection.count_documents(regex_query)
-    
+
     def insert_many(self, data_dict: list[dict]) -> None:
         """
         Insert multiple documents into the collection.
-        
+
         Args:
             data_dict (list[dict]): The list of dictionaries to be inserted.
         """
         self.collection.insert_many(data_dict)
-    
+
     def get_all_rows(self) -> list[dict]:
         """
         Retrieve all rows from the collection.
-        
+
         Returns:
             list[dict]: The list of all rows in the collection.
         """

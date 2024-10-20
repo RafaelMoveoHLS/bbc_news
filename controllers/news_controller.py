@@ -9,7 +9,7 @@ logger = get_logger()
 class NewsController:
     """ The NewsController class manages the business logic for news-related operations. """
     def __init__(self):
-        self.handler = NewsHandler()
+        self.handler: NewsHandler = NewsHandler()
 
     def count_matching_news(self, query: NewsQueryModel) -> int:
         """
