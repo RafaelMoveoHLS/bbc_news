@@ -7,6 +7,7 @@ router = APIRouter()
 
 controller = NewsController()
 
+
 @router.post("/count")
 async def count_news(query: NewsQueryModel) -> Dict[str, int]:
     """
@@ -21,6 +22,7 @@ async def count_news(query: NewsQueryModel) -> Dict[str, int]:
     """
     return controller.count_matching_news(query)
 
+
 @router.get("/search")
 async def semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:
     """
@@ -34,6 +36,7 @@ async def semantic_news_search(query: str = Query(..., description="The search q
         Dict[str, Any]: A list of dictionaries containing matching news articles.
     """
     return controller.semantic_news_search(query)
+
 
 @router.get("/question")
 async def question_the_news(question: str = Query(..., description="The question the user what to ask")) -> Dict[str, Any]:

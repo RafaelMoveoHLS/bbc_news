@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 from services.dataloader import load_data
 from services.exeptions import NewsLoadingError
 
+
 @pytest.mark.skip(reason="Not ready yet")
 @patch("services.dataloader.pd.read_csv")
 @patch("services.dataloader.embed_with_openai_batched")

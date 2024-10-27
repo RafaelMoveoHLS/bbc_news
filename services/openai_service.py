@@ -7,7 +7,8 @@ logger = get_logger()
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-def embed_with_openai_batched(texts: list[str], batch_size: int = 1000)-> list[list[float]]:
+
+def embed_with_openai_batched(texts: list[str], batch_size: int = 1000) -> list[list[float]]:
     """
     Embed a list of texts using the OpenAI API in batches.
 
@@ -17,11 +18,12 @@ def embed_with_openai_batched(texts: list[str], batch_size: int = 1000)-> list[l
 
     Returns:
         list[list[float]]: List of embeddings for the input texts.
-    """    
+    """
     emb_list = []
     # Process texts in batches
     for batch_texts in batch(texts, batch_size):
-        logger.info(f"Send {len(batch_texts)} news to OpenAI API. Got already {len(emb_list)} embeddings.")
+        logger.info(
+            f"Send {len(batch_texts)} news to OpenAI API. Got already {len(emb_list)} embeddings.")
         try:
             response = client.embeddings.create(
                 model="text-embedding-3-small",
@@ -35,6 +37,7 @@ def embed_with_openai_batched(texts: list[str], batch_size: int = 1000)-> list[l
             raise OpenAIEmbeddingError(e)
 
     return emb_list
+
 
 def batch(iterable: list, batch_size: int):
     """
@@ -51,7 +54,7 @@ def batch(iterable: list, batch_size: int):
         yield iterable[i:i + batch_size]
 
 
-def ask_chatgpt_4o_mini(prompt: str)-> str:
+def ask_chatgpt_4o_mini(prompt: str) -> str:
     """
     Use the OpenAI ChatGPT-4o-mini to generate an answer based on the given prompt.
 
@@ -63,13 +66,13 @@ def ask_chatgpt_4o_mini(prompt: str)-> str:
     """
     try:
         completion = client.chat.completions.create(
-        model = "gpt-4o-mini",
-        messages =[
-            {"role": "system", "content": "You are a question answering system, you answer questions based only on given context."},
-            {"role": "user", "content": prompt}
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a question answering system, you answer questions based only on given context."},
+                {"role": "user", "content": prompt}
             ]
         )
-    
+
         return completion.choices[0].message.content.strip()
     except Exception as e:
         logger.error(f"Failed to generate answer: {str(e)}")

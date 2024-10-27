@@ -6,15 +6,17 @@ from validators.news_validator import NewsQueryModel
 
 logger = get_logger()
 
+
 class NewsController:
     """ The NewsController class manages the business logic for news-related operations. """
+
     def __init__(self):
         self.handler: NewsHandler = NewsHandler()
 
     def count_matching_news(self, query: NewsQueryModel) -> int:
         """
         Count news that match the given query.
-        
+
         Args:
             query (NewsQueryModel): The query parameters in the request body.
 
@@ -24,13 +26,15 @@ class NewsController:
         try:
             return self.handler.count_matching_news(query)
         except Exception as e:
-            logger.error(msg=f"Status code:{500}. Error querying database: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error querying database: {str(e)}")
-    
+            logger.error(
+                msg=f"Status code:{500}. Error querying database: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Error querying database: {str(e)}")
+
     def semantic_news_search(self, query: str) -> Dict[str, Any]:
         """
         Retrieve related news articles based on semantic similarity.
-        
+
         Args:
             query (str): The search query passed as a query parameter.
 
@@ -40,22 +44,25 @@ class NewsController:
         try:
             return self.handler.semantic_news_search(query)
         except Exception as e:
-            logger.error(msg=f"Status code:{500}. Error while searching the news: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error while searching the news: {str(e)}")
-        
+            logger.error(
+                msg=f"Status code:{500}. Error while searching the news: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Error while searching the news: {str(e)}")
+
     def question_the_news(self, question: str) -> Dict[str, Any]:
         """
         Answer the user's question based on the relevant news.
-        
+
         Args:
             question (str): The user's question to answer according the news.
-        
+
         Returns:
             Dict[str, Any]: The relevant answer
         """
         try:
             return self.handler.question_the_news(question)
         except Exception as e:
-            logger.error(msg=f"Status code:{500}. Error while answering the question: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error while answering the question: {str(e)}")
-    
+            logger.error(
+                msg=f"Status code:{500}. Error while answering the question: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Error while answering the question: {str(e)}")

@@ -7,7 +7,8 @@ import pandas as pd
 logger = get_logger()
 news_manager = NewsManager()
 
-def load_data()->None:
+
+def load_data() -> None:
     """
     Load BBC news data from a CSV file into MongoDB if the collection is empty. 
     The news data is filtered to include only the first half of 2024 and enriched with OpenAI embeddings.
@@ -23,15 +24,17 @@ def load_data()->None:
             # Load news from CSV to MongoDB
             logger.info("Loading data from CSV to MongoDB...")
             df = pd.read_csv('bbc_news_data/bbc_news.csv')
-            
+
             # Filter the news data for the first half of 2024.
             df['pubDate'] = pd.to_datetime(df['pubDate'])
             filtered_df = df[(df['pubDate'] >= pd.to_datetime('2024-01-01'))
-                            & (df['pubDate'] < pd.to_datetime('2024-06-30'))]
+                             & (df['pubDate'] < pd.to_datetime('2024-06-30'))]
 
             # Drop duplicates based on 'title' or 'description'
-            filtered_df = filtered_df.drop_duplicates(subset=['title'], keep='first')
-            filtered_df = filtered_df.drop_duplicates(subset=['description'], keep='first')
+            filtered_df = filtered_df.drop_duplicates(
+                subset=['title'], keep='first')
+            filtered_df = filtered_df.drop_duplicates(
+                subset=['description'], keep='first')
 
             # Add embeddings to the news data using OpenAI API
             filtered_df = add_embeddings(filtered_df)
@@ -39,12 +42,14 @@ def load_data()->None:
             # Insert filtered news data into MongoDB
             news_dict = filtered_df.to_dict(orient='records')
             news_manager.insert_many(news_dict)
-            logger.info(f"Data loaded successfully into MongoDB-> [{len(news_dict)} documents]")
+            logger.info(
+                f"Data loaded successfully into MongoDB-> [{len(news_dict)} documents]")
     except Exception as e:
         logger.critical(f"Error loading data: {str(e)}")
         raise NewsLoadingError(f"Error loading data: {str(e)}")
 
-def add_embeddings(df:pd.DataFrame)->pd.DataFrame:
+
+def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:
     """
     Add OpenAI embeddings to the news data.
 
@@ -54,8 +59,10 @@ def add_embeddings(df:pd.DataFrame)->pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with an additional 'openai_embedding' column.
     """
-    df['content'] = df['title'].fillna('') + '. ' + df['description'].fillna('')
+    df['content'] = df['title'].fillna(
+        '') + '. ' + df['description'].fillna('')
     logger.info("Turning for OpenAI API for the embeddings")
-    df['openai_embedding'] = embed_with_openai_batched(df['content'].tolist(), 1000)
+    df['openai_embedding'] = embed_with_openai_batched(
+        df['content'].tolist(), 1000)
     logger.info("Successfully retrieved embeddings from OpenAI API.")
     return df
