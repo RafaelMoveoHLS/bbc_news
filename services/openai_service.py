@@ -1,8 +1,11 @@
 from openai import OpenAI
+from services.exeptions import OpenAIChatError, OpenAIEmbeddingError
 from services.logger import get_logger
 from config import OPENAI_API_KEY
 
 logger = get_logger()
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 def embed_with_openai_batched(texts: list[str], batch_size: int = 1000)-> list[list[float]]:
     """
@@ -15,7 +18,6 @@ def embed_with_openai_batched(texts: list[str], batch_size: int = 1000)-> list[l
     Returns:
         list[list[float]]: List of embeddings for the input texts.
     """    
-    client = OpenAI(api_key=OPENAI_API_KEY)
     emb_list = []
     # Process texts in batches
     for batch_texts in batch(texts, batch_size):
@@ -30,7 +32,7 @@ def embed_with_openai_batched(texts: list[str], batch_size: int = 1000)-> list[l
                 emb_list.append(emb.embedding)
         except Exception as e:
             logger.error(f"Failed to retrieve embeddings: {str(e)}")
-            raise
+            raise OpenAIEmbeddingError(e)
 
     return emb_list
 
@@ -47,3 +49,28 @@ def batch(iterable: list, batch_size: int):
     """
     for i in range(0, len(iterable), batch_size):
         yield iterable[i:i + batch_size]
+
+
+def ask_chatgpt_4o_mini(prompt: str)-> str:
+    """
+    Use the OpenAI ChatGPT-4o-mini to generate an answer based on the given prompt.
+
+    Args:
+        prompt (str): The prompt for the chatbot.
+
+    Returns:
+        str: The generated answer.
+    """
+    try:
+        completion = client.chat.completions.create(
+        model = "gpt-4o-mini",
+        messages =[
+            {"role": "system", "content": "You are a question answering system, you answer questions based only on given context."},
+            {"role": "user", "content": prompt}
+            ]
+        )
+    
+        return completion.choices[0].message.content.strip()
+    except Exception as e:
+        logger.error(f"Failed to generate answer: {str(e)}")
+        raise OpenAIChatError(e)
