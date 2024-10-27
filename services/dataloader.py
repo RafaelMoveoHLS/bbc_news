@@ -54,7 +54,7 @@ def add_embeddings(df:pd.DataFrame)->pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with an additional 'openai_embedding' column.
     """
-    df['content'] = df['title'].fillna('') + ' ' + df['description'].fillna('')
+    df['content'] = df['title'].fillna('') + '. ' + df['description'].fillna('')
     logger.info("Turning for OpenAI API for the embeddings")
     df['openai_embedding'] = embed_with_openai_batched(df['content'].tolist(), 1000)
     logger.info("Successfully retrieved embeddings from OpenAI API.")
