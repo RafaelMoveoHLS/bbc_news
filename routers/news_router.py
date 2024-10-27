@@ -34,3 +34,16 @@ async def semantic_news_search(query: str = Query(..., description="The search q
         Dict[str, Any]: A list of dictionaries containing matching news articles.
     """
     return controller.semantic_news_search(query)
+
+@router.get("/question")
+async def question_the_news(question: str = Query(..., description="The question the user what to ask")) -> Dict[str, Any]:
+    """
+    API route that receives a user question, and return an answer based on the relevant news.
+
+    Args:
+        question (str): The user's question to answer according the news.
+
+    Returns:
+        Dict[str, Any]: Dictionary with the relevant answer
+    """
+    return controller.question_the_news(question)

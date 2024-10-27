@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from handlers.main_handler import Handler
 from managers.news_manager import NewsManager
-from services.openai_service import embed_with_openai_batched
+from services.openai_service import ask_chatgpt_4o_mini, embed_with_openai_batched
 from validators.news_validator import NewsQueryModel
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -70,13 +70,38 @@ class NewsHandler(Handler):
         if len(relevant_news) > 0:
             # Sort relevant news by similarity in descending order
             sorted_news = sorted(relevant_news, key=lambda x: x["cosine_similarity"], reverse=True)
-
-            # print results
-            print(f"\n\n\n\033[94mQuery: {query} \033[0m")
-            for item in sorted_news:
-                print(f"\033[96m (Similarity: {item['cosine_similarity']:.3f})\033[0m RSS news content: {item['content']}")
-
-            # Prepare the response object with related news
             return {"related_news": sorted_news}
         else:
             return {"related_news": "No relevant news found."}
+    
+    def question_the_news(self, question: str) -> Dict[str, Any]:
+        """
+        Answer the user's question based on the relevant news.
+
+        Args:
+            question (str): The user's question to answer according the news.
+        
+        
+        Returns:
+            Dict[str, Any]: The response body object containing the relevant answer.
+        """
+        # Retrieve all relevant news
+        relevant_news = self.semantic_news_search(question)["related_news"]
+        if relevant_news == "No relevant news found.": 
+            return {"answer": "No news found to answer this question."}
+        
+        # Prepare the prompt
+        # Combine relevant news content into a single context passage
+        context = "".join([f"<p>{news['content']}</p>" for news in relevant_news])
+
+        # Limit context length if necessary (for efficient processing)
+        max_context_length = 5000
+        if len(context) > max_context_length:
+            context = context[:max_context_length]
+
+        prompt = f"""Context: {context}
+        Question: {question}
+        Answer accurately and concisely based only on the provided context, focusing on the most relevant details:"""
+        
+        answer = ask_chatgpt_4o_mini(prompt)
+        return {"answer": answer}

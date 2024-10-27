@@ -42,4 +42,20 @@ class NewsController:
         except Exception as e:
             logger.error(msg=f"Status code:{500}. Error while searching the news: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error while searching the news: {str(e)}")
+        
+    def question_the_news(self, question: str) -> Dict[str, Any]:
+        """
+        Answer the user's question based on the relevant news.
+        
+        Args:
+            question (str): The user's question to answer according the news.
+        
+        Returns:
+            Dict[str, Any]: The relevant answer
+        """
+        try:
+            return self.handler.question_the_news(question)
+        except Exception as e:
+            logger.error(msg=f"Status code:{500}. Error while answering the question: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error while answering the question: {str(e)}")
     
