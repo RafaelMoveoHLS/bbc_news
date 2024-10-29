@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
@@ -130,3 +131,50 @@ def test_semantic_news_search_failure(mock_get_all_rows, mock_embed_with_openai_
 
     # Assert the error message in the response
     assert "Error while searching the news" in response.json()["detail"]
+
+
+def test_question_the_news_success(mock_news_handler, monkeypatch):
+    """
+    Test the /news/question route for a successful response when relevant news is found.
+    """
+    # Mock response from question_the_news method in NewsHandler
+    mock_response = {"answer": "This is a relevant answer based on the news context."}
+    mock_news_handler.handler.question_the_news.return_value = mock_response
+
+    # Apply the monkeypatch to override the original method
+    monkeypatch.setattr(NewsController, "question_the_news", mock_news_handler.handler.question_the_news)
+
+    response = client.get("/news/question", params={"question": "is the test ok?"})
+    assert response.status_code == 200
+    assert response.json() == mock_response
+
+
+def test_question_the_news_no_relevant_news(mock_news_handler, monkeypatch):
+    """
+    Test the /news/question route when no relevant news is found.
+    """
+    # Mock response when no relevant news is available
+    mock_response = {"answer": "No news found to answer this question."}
+    mock_news_handler.handler.question_the_news.return_value = mock_response
+
+    monkeypatch.setattr(NewsController, "question_the_news", mock_news_handler.handler.question_the_news)
+
+    response = client.get("/news/question", params={"question": "is the test ok?"})
+    assert response.status_code == 200
+    assert response.json() == mock_response
+
+
+def test_question_the_news_exception_handling(mock_news_handler, monkeypatch):
+    """
+    Test the /news/question route to ensure proper handling of exceptions.
+    """
+    # Mock HTTPException to simulate a server error
+    def mock_side_effect(*args, **kwargs):
+        raise HTTPException(status_code=500, detail="Error while answering the question: Error during processing")
+    
+    mock_news_handler.handler.question_the_news.side_effect = mock_side_effect
+    monkeypatch.setattr(NewsController, "question_the_news", mock_news_handler.handler.question_the_news)
+
+    response = client.get("/news/question", params={"question": "is the test ok?"})
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error while answering the question: Error during processing"}
