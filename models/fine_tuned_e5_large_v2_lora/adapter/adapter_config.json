@@ -23,8 +23,8 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "key",
     "query",
+    "key",
     "value"
   ],
   "task_type": null,
