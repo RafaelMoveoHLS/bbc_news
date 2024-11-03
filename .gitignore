@@ -168,3 +168,5 @@ logs/*
 !logs/.gitkeep
 bbc_news_data/*
 !bbc_news_data/.gitkeep
+notebooks/notebooks_data/*
+!notebooks/notebooks_data/.gitkeep
