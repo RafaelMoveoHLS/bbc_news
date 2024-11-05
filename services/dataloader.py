@@ -1,15 +1,17 @@
 from managers.news_manager import NewsManager
+from services.e5_service import embed_with_e5
 from services.exeptions import NewsLoadingError
 from services.logger import get_logger
 from services.openai_service import embed_with_openai_batched
 import pandas as pd
+
 
 logger = get_logger()
 news_manager = NewsManager()
 
 
 def load_data() -> None:
-    """
+    """ 
     Load BBC news data from a CSV file into MongoDB if the collection is empty. 
     The news data is filtered to include only the first half of 2024 and enriched with OpenAI embeddings.
 
@@ -54,7 +56,7 @@ def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:
     Add OpenAI embeddings to the news data.
 
     Args:
-        df (pd.DataFrame): DataFrame containing news articles.
+        df (pd.DataFrame): DataFrame containing news articles. 
 
     Returns:
         pd.DataFrame: DataFrame with an additional 'openai_embedding' column.
@@ -63,6 +65,10 @@ def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:
         '') + '. ' + df['description'].fillna('')
     logger.info("Turning for OpenAI API for the embeddings")
     df['openai_embedding'] = embed_with_openai_batched(
-        df['content'].tolist(), 1000)
+        df['content'].tolist(), 1000) 
     logger.info("Successfully retrieved embeddings from OpenAI API.")
+
+    logger.info("Turning for E5 for the embeddings")
+    df['e5_embedding'] = embed_with_e5(df['content'].tolist())
+    logger.info("Successfully created embeddings by E5.")
     return df

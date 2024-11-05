@@ -37,6 +37,20 @@ async def semantic_news_search(query: str = Query(..., description="The search q
     """
     return controller.semantic_news_search(query)
 
+@router.get("/finetuned-search")
+async def finetuned_semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:
+    """
+    API route that receives a search query as a query parameter and returns related news articles
+    based on semantic similarity done by fine-tuned E5 embedding model.
+
+    Args:
+        query (str): The search query passed as a query parameter.
+
+    Returns:
+        Dict[str, Any]: A list of dictionaries containing matching news articles.
+    """
+    return controller.semantic_news_search(query, "E5")
+
 
 @router.get("/question")
 async def question_the_news(question: str = Query(..., description="The question the user what to ask")) -> Dict[str, Any]:

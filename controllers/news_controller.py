@@ -31,7 +31,7 @@ class NewsController:
             raise HTTPException(
                 status_code=500, detail=f"Error querying database: {str(e)}")
 
-    def semantic_news_search(self, query: str) -> Dict[str, Any]:
+    def semantic_news_search(self, query: str, model_name:str = "OpenAI") -> Dict[str, Any]:
         """
         Retrieve related news articles based on semantic similarity.
 
@@ -42,12 +42,13 @@ class NewsController:
             Dict[str, Any]: List of related news articles
         """
         try:
-            return self.handler.semantic_news_search(query)
+            return self.handler.semantic_news_search(query, model_name)
         except Exception as e:
             logger.error(
                 msg=f"Status code:{500}. Error while searching the news: {str(e)}")
             raise HTTPException(
                 status_code=500, detail=f"Error while searching the news: {str(e)}")
+        
 
     def question_the_news(self, question: str) -> Dict[str, Any]:
         """

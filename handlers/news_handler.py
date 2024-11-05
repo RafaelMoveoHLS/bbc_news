@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from handlers.main_handler import Handler
 from managers.news_manager import NewsManager
+from services.e5_service import embed_with_e5
 from services.openai_service import ask_chatgpt_4o_mini, embed_with_openai_batched
 from validators.news_validator import NewsQueryModel
 from sklearn.metrics.pairwise import cosine_similarity
@@ -28,7 +29,7 @@ class NewsHandler(Handler):
         query_dict = query.model_dump(exclude_none=True)
         return {"count": self.manager.count_matching_rows(query_dict)}
 
-    def semantic_news_search(self, query: str) -> Dict[str, Any]:
+    def semantic_news_search(self, query: str, model_name:str) -> Dict[str, Any]:
         """
         Retrieve related news articles based on semantic similarity.
 
@@ -41,22 +42,32 @@ class NewsHandler(Handler):
         # Retrieve all news articles from the database
         all_news = self.manager.get_all_rows()
 
-        # Embed the query using OpenAI
-        query_embedding = embed_with_openai_batched([query])[0]
+        if model_name == "OpenAI":
+            # Embed the query using OpenAI
+            query_embedding = embed_with_openai_batched([query])[0]
+            similarity_threshold = 0.41
+        elif model_name == "E5":
+            # Embed the query using E5
+            query_embedding = embed_with_e5([query])[0]
+            similarity_threshold = 0.91
 
         # List to store relevant news with their similarity scores
         relevant_news = []
 
         # Iterate over each news article and calculate cosine similarity
         for news in all_news:
-            news_embedding = news.get('openai_embedding', [])
+            if model_name == "OpenAI":
+                news_embedding = news.get('openai_embedding', [])
+            elif model_name == "E5":
+                news_embedding = news.get('e5_embedding', [])
+
             if news_embedding:
                 # Calculate cosine similarity between query and news embedding
                 similarity = cosine_similarity(
                     [query_embedding], [news_embedding])[0][0]
 
                 # Add to relevant news if similarity exceeds threshold
-                if similarity >= 0.41:
+                if similarity >= similarity_threshold:
                     relevant_news.append({
                         "title": news["title"],
                         "description": news["description"],
