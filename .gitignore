@@ -163,8 +163,13 @@ cython_debug/
 .history/
 .vscode/
 
-# Ignore all files in the logs directory
+# Add only directories
 logs/*
-
-# Except the logs directory itself
 !logs/.gitkeep
+bbc_news_data/*
+!bbc_news_data/.gitkeep
+notebooks/notebooks_data/*
+!notebooks/notebooks_data/.gitkeep
+
+# Ignore local saved models
+models/fine_tuned_e5_large_v2_lora/base_model
