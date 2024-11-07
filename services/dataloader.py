@@ -38,7 +38,6 @@ def load_data() -> None:
             filtered_df = filtered_df.drop_duplicates(
                 subset=['description'], keep='first')
 
-            # Add embeddings to the news data using OpenAI API
             filtered_df = add_embeddings(filtered_df)
 
             # Insert filtered news data into MongoDB
@@ -53,20 +52,18 @@ def load_data() -> None:
 
 def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Add OpenAI embeddings to the news data.
+    Add embeddings to the news data.
 
     Args:
         df (pd.DataFrame): DataFrame containing news articles. 
 
     Returns:
-        pd.DataFrame: DataFrame with an additional 'openai_embedding' column.
+        pd.DataFrame: DataFrame with an additional 'e5_embedding' column.
     """
-    df['content'] = df['title'].fillna(
-        '') + '. ' + df['description'].fillna('')
-    logger.info("Turning for OpenAI API for the embeddings")
-    df['openai_embedding'] = embed_with_openai_batched(
-        df['content'].tolist(), 1000) 
-    logger.info("Successfully retrieved embeddings from OpenAI API.")
+    # df['content'] = df['title'].fillna('') + '. ' + df['description'].fillna('')
+    # logger.info("Turning for OpenAI API for the embeddings")
+    # df['openai_embedding'] = embed_with_openai_batched(df['content'].tolist(), 1000) 
+    # logger.info("Successfully retrieved embeddings from OpenAI API.")
 
     logger.info("Turning for E5 for the embeddings")
     df['e5_embedding'] = embed_with_e5(df['content'].tolist())
