@@ -29,7 +29,7 @@ class NewsHandler(Handler):
         query_dict = query.model_dump(exclude_none=True)
         return {"count": self.manager.count_matching_rows(query_dict)}
 
-    def semantic_news_search(self, query: str, model_name:str) -> Dict[str, Any]:
+    def semantic_news_search(self, query: str, model_name:str = 'E5') -> Dict[str, Any]:
         """
         Retrieve related news articles based on semantic similarity.
 

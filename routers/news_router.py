@@ -23,19 +23,19 @@ async def count_news(query: NewsQueryModel) -> Dict[str, int]:
     return controller.count_matching_news(query)
 
 
-@router.get("/search")
-async def semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:
-    """
-    API route that receives a search query as a query parameter and returns related news articles
-    based on semantic similarity.
+# @router.get("/search")
+# async def semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:
+#     """
+#     API route that receives a search query as a query parameter and returns related news articles
+#     based on semantic similarity.
 
-    Args:
-        query (str): The search query passed as a query parameter.
+#     Args:
+#         query (str): The search query passed as a query parameter.
 
-    Returns:
-        Dict[str, Any]: A list of dictionaries containing matching news articles.
-    """
-    return controller.semantic_news_search(query)
+#     Returns:
+#         Dict[str, Any]: A list of dictionaries containing matching news articles.
+#     """
+#     return controller.semantic_news_search(query)
 
 @router.get("/finetuned-search")
 async def finetuned_semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:

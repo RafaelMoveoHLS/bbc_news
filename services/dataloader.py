@@ -2,7 +2,7 @@ from managers.news_manager import NewsManager
 from services.e5_service import embed_with_e5
 from services.exeptions import NewsLoadingError
 from services.logger import get_logger
-from services.openai_service import embed_with_openai_batched
+# from services.openai_service import embed_with_openai_batched
 import pandas as pd
 
 
@@ -61,8 +61,8 @@ def add_embeddings(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame: DataFrame with an additional 'e5_embedding' column.
     """
-    # df['content'] = df['title'].fillna(
-    #     '') + '. ' + df['description'].fillna('')
+    df['content'] = df['title'].fillna(
+        '') + '. ' + df['description'].fillna('')
     # logger.info("Turning for OpenAI API for the embeddings")
     # df['openai_embedding'] = embed_with_openai_batched(
     #     df['content'].tolist(), 1000) 
