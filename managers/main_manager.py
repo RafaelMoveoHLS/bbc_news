@@ -2,7 +2,7 @@ from abc import abstractmethod
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
-from config import MONGO_DB_URI
+from config import MONGO_DB_ATLAS_URI
 
 
 class Manager:
@@ -11,7 +11,7 @@ class Manager:
     """
 
     def __init__(self, db_name: str, collection_name: str) -> None:
-        self.client: MongoClient = MongoClient(MONGO_DB_URI)
+        self.client: MongoClient = MongoClient(MONGO_DB_ATLAS_URI)
         self.db: Database = self.client[db_name]
         self.collection: Collection = self.db[collection_name]
 
