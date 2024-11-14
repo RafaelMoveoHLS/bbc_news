@@ -42,6 +42,7 @@ class NewsController:
             Dict[str, Any]: List of related news articles
         """
         try:
+            logger.info(f"Searching for related news using {model_name}. Query:{query}")
             return self.handler.semantic_news_search(query, model_name)
         except Exception as e:
             logger.error(
