@@ -173,3 +173,8 @@ notebooks/notebooks_data/*
 
 # Ignore local saved models
 models/fine_tuned_e5_large_v2_lora/base_model
+models/fine_tuned_e5_large_v2_lora_combined
+
+# Ignore lambda functions libraries
+lambda_functions/ask_chatgpt_4o_mini/*
+!lambda_functions/ask_chatgpt_4o_mini/ask_chatgpt_4o_mini
