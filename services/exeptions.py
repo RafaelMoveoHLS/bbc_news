@@ -13,3 +13,7 @@ class OpenAIChatError(Exception):
 class SageMakerError(Exception):
     """ Raised when there is an error in the request sent to SageMaker"""
     pass
+
+class MongoDBVectorSearchError(Exception):
+    """ Raised when there is an error in the vector search in MongoDB"""
+    pass

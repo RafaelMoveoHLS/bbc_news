@@ -1,13 +1,9 @@
 import json
-import time
 from typing import Any, Dict
 from config import STEP_FUNCTION_ARN
-from lambda_functions.ask_chatgpt_4o_mini import ask_chatgpt_4o_mini
-from lambda_functions.process_raw_answer import process_chatgpt_raw_answer
 from services.exeptions import OpenAIChatError
 from services.logger import get_logger
 from handlers.main_handler import Handler
-from lambda_functions.create_prompt import create_prompt
 from managers.news_manager import NewsManager
 from services.e5_service import embed_with_e5
 from services.openai_service import embed_with_openai_batched
@@ -40,66 +36,53 @@ class NewsHandler(Handler):
         query_dict = query.model_dump(exclude_none=True)
         return {"count": self.manager.count_matching_rows(query_dict)}
 
-    def semantic_news_search(self, query: str, model_name:str = 'E5') -> Dict[str, Any]:
+    def semantic_news_search(self, query: str, model_name: str = "E5", top_n: int = 20) -> Dict[str, Any]:
         """
-        Retrieve related news articles based on semantic similarity.
+        Retrieve related news articles based on semantic similarity using MongoDB Vector Search.
 
         Args:
             query (str): The search query passed as a query parameter.
+            model_name (str): The embedding model to use for query embedding ("E5" or "OpenAI"). Defaults to "E5".
+            top_n (int): The number of top-related news articles to retrieve. Defaults to 10.
 
         Returns:
             Dict[str, Any]: The response body object containing the related news articles.
         """
-        # Retrieve all news articles from the database
-        logger.info("Starting to retrieve all news articles...")
-        start_time = time.time()
-        all_news = self.manager.get_all_rows()
-        # Log the completion of news retrieval and calculate elapsed time
-        end_time = time.time()
-        logger.info(f"Finished retrieving news articles. Total time taken: {(end_time - start_time):.0f} seconds.")
-
+        # Embed the query based on the specified model
         if model_name == "OpenAI":
-            # Embed the query using OpenAI
             query_embedding = embed_with_openai_batched([query])[0]
-            similarity_threshold = 0.41
         elif model_name == "E5":
-            # Embed the query using E5
             query_embedding = embed_with_e5([query])[0]
-            similarity_threshold = 0.91
+        else:
+            raise ValueError(f"Unsupported model name: {model_name}")
 
-        # List to store relevant news with their similarity scores
+        # Retrieve top N related rows using the vector search
+        top_n_news = self.manager.get_top_n_related_rows(query_embedding, top_n)
+
         relevant_news = []
 
-        # Iterate over each news article and calculate cosine similarity
-        for news in all_news:
-            if model_name == "OpenAI":
-                news_embedding = news.get('openai_embedding', [])
-            elif model_name == "E5":
-                news_embedding = news.get('e5_embedding', [])
-
-            if news_embedding:
-                # Calculate cosine similarity between query and news embedding
-                similarity = cosine_similarity(
-                    [query_embedding], [news_embedding])[0][0]
-
+        if top_n_news:
+            for news in top_n_news:
                 # Add to relevant news if similarity exceeds threshold
-                if similarity >= similarity_threshold:
+                similarity = cosine_similarity([query_embedding], [news['e5_embedding']])[0][0]
+                if similarity >= 0.91:
                     relevant_news.append({
                         "title": news["title"],
                         "description": news["description"],
                         "link": news["link"],
                         "published_date": news["pubDate"].strftime("%Y-%m-%d"),
-                        "guid": news["guid"],
-                        "content": news["content"],
-                        "cosine_similarity": round(similarity, 4)
+                        "calculated_cosine_similarity": round(similarity,4),
+                        # "guid": news["guid"],
+                        # "content": news["content"],
+                        # "cosine_similarity": round(news['cosine_similarity'],4)
                     })
-
-        if len(relevant_news) > 0:
-            # Sort relevant news by similarity in descending order
-            sorted_news = sorted(relevant_news, key=lambda x: x["cosine_similarity"], reverse=True)
+            # Format the result and return sorted news by similarity
+            sorted_news = sorted(relevant_news, key=lambda x: x["calculated_cosine_similarity"], reverse=True)
             return {"related_news": sorted_news}
         else:
             return {"related_news": "No relevant news found."}
+
+
 
     def question_the_news(self, question: str) -> Dict[str, Any]:
         """
