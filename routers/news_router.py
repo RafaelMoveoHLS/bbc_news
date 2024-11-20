@@ -27,7 +27,7 @@ async def count_news(query: NewsQueryModel) -> Dict[str, int]:
 # async def semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:
 #     """
 #     API route that receives a search query as a query parameter and returns related news articles
-#     based on semantic similarity.
+#     based on semantic similarity done by OpenAI embedding model.
 
 #     Args:
 #         query (str): The search query passed as a query parameter.
@@ -35,7 +35,7 @@ async def count_news(query: NewsQueryModel) -> Dict[str, int]:
 #     Returns:
 #         Dict[str, Any]: A list of dictionaries containing matching news articles.
 #     """
-#     return controller.semantic_news_search(query)
+#     return controller.semantic_news_search(query, "OpenAI")
 
 @router.get("/finetuned-search")
 async def finetuned_semantic_news_search(query: str = Query(..., description="The search query")) -> Dict[str, Any]:
@@ -64,3 +64,8 @@ async def question_the_news(question: str = Query(..., description="The question
         Dict[str, Any]: Dictionary with the relevant answer
     """
     return controller.question_the_news(question)
+
+
+@router.get("/test")
+async def test(text: str = Query(..., description="test text")) -> Dict[str,Any]:
+    return {"test": f"text:{text}"}
