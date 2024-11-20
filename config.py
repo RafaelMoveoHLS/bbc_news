@@ -34,3 +34,6 @@ secrets = get_secret(secret_name, region_name)
 # Access the secrets
 OPENAI_API_KEY = secrets["OPENAI_API_KEY"]
 MONGO_DB_ATLAS_URI = secrets["MONGO_DB_URI_ATLAS"]
+STEP_FUNCTION_ARN = secrets["STEP_FUNCTION_ARN"]
+HF_API_TOKEN = secrets["HF_API_TOKEN"]
+SAGEMAKER_IAM_ROLE = secrets["SAGEMAKER_IAM_ROLE"]
