@@ -1,5 +1,5 @@
 from openai import OpenAI
-from services.exeptions import OpenAIChatError, OpenAIEmbeddingError
+from services.exeptions import OpenAIEmbeddingError
 from services.logger import get_logger
 from config import OPENAI_API_KEY
 
@@ -52,28 +52,3 @@ def batch(iterable: list, batch_size: int):
     """
     for i in range(0, len(iterable), batch_size):
         yield iterable[i:i + batch_size]
-
-
-def ask_chatgpt_4o_mini(prompt: str) -> str:
-    """
-    Use the OpenAI ChatGPT-4o-mini to generate an answer based on the given prompt.
-
-    Args:
-        prompt (str): The prompt for the chatbot.
-
-    Returns:
-        str: The generated answer.
-    """
-    try:
-        completion = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a question answering system, you answer questions based only on given context."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-
-        return completion.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error(f"Failed to generate answer: {str(e)}")
-        raise OpenAIChatError(e)

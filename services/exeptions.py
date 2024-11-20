@@ -9,3 +9,7 @@ class OpenAIEmbeddingError(Exception):
 class OpenAIChatError(Exception):
     """ Raised when there is an error in the request sent to OpenAI ChatGPT-4o-mini chatbot"""
     pass
+
+class SageMakerError(Exception):
+    """ Raised when there is an error in the request sent to SageMaker"""
+    pass
