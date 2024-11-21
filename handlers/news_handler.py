@@ -61,22 +61,22 @@ class NewsHandler(Handler):
 
         relevant_news = []
 
-        if top_n_news:
-            for news in top_n_news:
-                # Add to relevant news if similarity exceeds threshold
-                similarity = cosine_similarity([query_embedding], [news['e5_embedding']])[0][0]
-                if similarity >= 0.91:
-                    relevant_news.append({
-                        "title": news["title"],
-                        "description": news["description"],
-                        "link": news["link"],
-                        "published_date": news["pubDate"].strftime("%Y-%m-%d"),
-                        "calculated_cosine_similarity": round(similarity,4),
-                        # "guid": news["guid"],
-                        # "content": news["content"],
-                        # "cosine_similarity": round(news['cosine_similarity'],4)
-                    })
-            # Format the result and return sorted news by similarity
+        for news in top_n_news:
+            # Add to relevant news if similarity exceeds threshold
+            similarity = cosine_similarity([query_embedding], [news['e5_embedding']])[0][0]
+            if similarity >= 0.91:
+                relevant_news.append({
+                    "title": news["title"],
+                    "description": news["description"],
+                    "link": news["link"],
+                    "published_date": news["pubDate"].strftime("%Y-%m-%d"),
+                    "calculated_cosine_similarity": round(similarity,4),
+                    # "guid": news["guid"],
+                    # "content": news["content"],
+                    # "cosine_similarity": round(news['cosine_similarity'],4)
+                })
+
+        if relevant_news:
             sorted_news = sorted(relevant_news, key=lambda x: x["calculated_cosine_similarity"], reverse=True)
             return {"related_news": sorted_news}
         else:
